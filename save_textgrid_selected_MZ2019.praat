@@ -3,11 +3,11 @@
 # Make sure you have backups of your old files before running this script. 
 # Miao Zhang (2019). miaozhan@buffalo.edu
 
-# Put the directory you want to save files to below.
-# There will be no pop-out window to let you choose the directory. 
-# Make sure you have put in the right directory below before running the script.
+# Put the directory where you want to save the textgrid files.
+# There will be no pop-out window that lets you choose the directory. 
+# Make sure you have put the right directory below before running the script.
 
-dir$ = "/Users/zenmule/Research/Changsha_Xiang/Exp_2/recordings/m3_LG"
+dir$ = "/Users/zenmule/Research/Changsha_Xiang/Exp_1/recordings/m3_HQ"
 
 n = numberOfSelected("TextGrid")
 for i from 1 to n
