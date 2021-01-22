@@ -1,0 +1,30 @@
+# Paint spectrogram, formant contours, and textgrid 
+# from the current visible window
+
+# Miao Zhang, 1/2020
+
+
+Erase all
+
+# Select viewport
+Select outer viewport: 0, 5, 0, 4
+Paint visible spectrogram: "yes", "no", "no", "no", "no"
+
+# Pen color
+Red
+
+# Draw formant contour
+Draw visible formant contour: "no", "no", "no", "no", "yes"
+
+# Select viewport
+Select outer viewport: 0, 6, 0, 5
+
+# Pencolor
+Black
+
+# Draw textgrid
+Draw visible TextGrid: "no", "no", "no", "no", "yes"
+
+# change the directory and the filename
+Save as 300-dpi PNG file: "/Users/zenmule/Programming/Praat_scripts/myPraatScripts/pi.png"
+

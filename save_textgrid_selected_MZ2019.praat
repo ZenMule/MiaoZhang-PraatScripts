@@ -7,7 +7,7 @@
 # There will be no pop-out window that lets you choose the directory. 
 # Make sure you have put the right directory below before running the script.
 
-dir$ = "/Users/zenmule/Research/Changsha_Xiang/Exp_1/recordings/f1_ZY"
+dir$ = "/Users/zenmule/Research/bidi"
 
 n = numberOfSelected("TextGrid")
 for i from 1 to n

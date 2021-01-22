@@ -5,8 +5,8 @@
 
 form Extract Durations from labelled tier
    sentence Directory_name: /Users/zenmule/Research/KansaiJPN_CF0/Experiment/recordings/M1_HK
-   sentence Log_file _dur
-   positive Labeled_tier_number 3
+   sentence Log_file _vot
+   positive Labeled_tier_number 1
    positive Analysis_points_time_step 0.005
    positive Record_with_precision 1
 endform
