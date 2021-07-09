@@ -10,13 +10,13 @@
 
 # 4. If there is already a folder with the same name in the directory, the script won't run.
 
-# 5. Copyright Miao Zhang, SUNY Buffalo, 7/8/2021. Please site when you use this script. Thank you!
+# 5. Copyright Miao Zhang, SUNY Buffalo, 7/8/2021.
 
 ############################################################
 
 form Extract smaller files from large file
-   sentence Directory_name: /Users/zenmule/Research/Test_pool/prosody
-   sentence Renamed_file_prefix: pros_
+   sentence Directory_name: /Users/zenmule/Programming/Praat/Praat_Scripting_Tutorial/testing_data/L2
+   sentence Renamed_file_prefix: prac2_
    positive Tier_number: 1
 endform
 
@@ -26,7 +26,7 @@ endform
 clearinfo
 
 # Create a file list for all the recordings in the directory
-Create Strings as file list: "fileList", "/Users/zenmule/Research/Test_pool/prosody/*.wav"
+Create Strings as file list: "fileList", directory_name$ + "/*.wav"
 
 # Select the file list and get how many files there are in the directory
 select Strings fileList
@@ -60,8 +60,6 @@ for i_file from 1 to num_file
 	printline 'num_intvl' intervals in total in tier 'tier_number'.
 
 	for i from 1 to num_intvl
-		printline Start working on interval No.'i'
-
 		# Make sure the textgrid file is selected before running the codes below
 		select 'textgrid_file'
 
@@ -70,6 +68,9 @@ for i_file from 1 to num_file
 
 		# If the label is not empty, then
 		if lab$ <> ""
+			# Report the current progress
+			printline Start working on interval No.'i', "'lab$'".
+		
 			# Get the start and end time of the current labeled interval
 			start = Get start time of interval: tier_number, i
 			end = Get end time of interval: tier_number, i
