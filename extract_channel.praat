@@ -1,25 +1,46 @@
 # Extract a specific channel script
-# This script converts all sound files in a directory to mono files, extracting the channel you
-# specify.
+# This script extract one of the channels as you specify below and save them.
 
-# WARNING: THIS SCRIPT WILL REPLACE YOUR FILES IN YOUR DIRECTORY WITH 1 CHANNEL SOUNDFILES. PLEASE SAVE/COPY 
-# UNMODIFIED SOUND FILES IN A SEPARATE DIRECTORY.
+# WARNING: THIS SCRIPT WILL REPLACE YOUR FILES IN YOUR DIRECTORY. 
+# PLEASE BACK UP BEFORE RUNNING THIS SCRIPT. 
 
-form Convert to single channel
-   sentence Directory_name: /Users/zenmule/Research/cs_obs/rec
-   positive Channel: 1
+# Copyright, Miao Zhang, SUNY Buffalo, 7/8/2021.
+
+############################################################
+
+form Extract channel
+   sentence Directory_name: /Users/zenmule/Research/Test_pool/prosody
+   positive Channel_number: 1
 endform
 
-Create Strings as file list... list 'directory_name$'/*.wav
-numberOfFiles = Get number of strings
-for ifile to numberOfFiles
-	select Strings list
-	fileName$ = Get string... ifile
-	Read from file... 'directory_name$'/'fileName$'
-	Extract one channel: channel
-	lengthFN = length (fileName$)
-	newfilename$ = left$ (fileName$, lengthFN-4)
-	Write to WAV file... 'directory_name$'/'newfilename$'.wav
+############################################################
+
+# Clear the info window
+clearinfo
+
+# Get all the files from the directory
+Create Strings as file list: "fileList", directory_name$ + "/*.wav"
+num_file = Get number of strings
+
+printline 'num_file' file(s) in the directory 'directory_name$'.
+
+for i_file to num_file
+	select Strings fileList
+	fileName$ = Get string: i_file
+
+	Read from file: directory_name$ + "/" + fileName$
+	
+	# Get the file name
+	sound_name$ = selected$("Sound") 
+
+	# Extract the specified channel
+	Extract one channel: channel_number
+	Write to WAV file: directory_name$ + "/" + sound_name$ + ".wav"
+	
+	printline 'i_file'/'num_file' file(s) done.
 endfor
+
 select all
 Remove
+
+printline All Done!
