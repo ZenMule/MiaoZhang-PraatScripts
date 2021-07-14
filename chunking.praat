@@ -35,7 +35,7 @@ num_file = Get number of strings
 for i_file from 1 to num_file
 
 	# Make sure the file list is selected before reading in sound files
-	select Strings fileList
+	selectObject: "Strings fileList"
 	current_file$ = Get string: i_file
 
 	# Read in the sound file
