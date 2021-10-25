@@ -15,8 +15,7 @@
 ############################################################
 
 form Extract smaller files from large file
-   sentence Directory_name: /Users/zenmule/Programming/Praat/Praat_Scripting_Tutorial/testing_data/L2
-   sentence Renamed_file_prefix: prac2_
+   sentence Directory_name: /Users/zenmule/Research/Vowel_sequence/Recordings/chn/chn_12
    positive Tier_number: 1
 endform
 
@@ -84,11 +83,11 @@ for i_file from 1 to num_file
 			Extract part: start, end, "rectangular", 1, "no"
 
 			# Save the sound file with the prefix specified in the form and the current name of the label
-			Write to WAV file: new_dir$ + "/" + renamed_file_prefix$ + lab$ + ".wav"
+			Write to WAV file: new_dir$ + "/" + sound_name$ + "_" + lab$ + ".wav"
 		
 			# Save the textgrid file in the same way
 			select 'textgrid_chunk'
-			Save as text file: new_dir$ + "/" + renamed_file_prefix$ + lab$ + ".TextGrid"
+			Save as text file: new_dir$ + "/" + sound_name$ + "_" + lab$ + ".TextGrid"
 	
 		# If the label is empty, then do nothing
 		else

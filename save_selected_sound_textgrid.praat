@@ -9,7 +9,7 @@
 # Put the directory you want to save files to below
 
 form
-	sentence dir: /Users/zenmule/Box Sync/Ikema/Word_recordings/14_Tadashi_Nakama
+	sentence dir: /Users/zenmule/Research/Vowel_sequence/Recordings/en/en_2
 endform
 
 ################################################
@@ -38,16 +38,16 @@ endfor
 n_txtg = numberOfSelected("TextGrid")
 
 for i from 1 to n_txtg
-t'i' = selected("TextGrid",'i')
-t'i'$ = selected$("TextGrid",'i')
+	t'i' = selected("TextGrid",'i')
+	t'i'$ = selected$("TextGrid",'i')
 endfor
 
 # Save the textGrid files
 
 for i from 1 to n_txtg
-t_name$ = t'i'$
-select t'i'
-Save as text file... 'dir$'/'t_name$'.TextGrid
+	t_name$ = t'i'$
+	select t'i'
+	Save as text file... 'dir$'/'t_name$'.TextGrid
 endfor
 
 ################################################
