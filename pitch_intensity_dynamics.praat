@@ -1,10 +1,10 @@
 # This script extract the total duration and F0 from equidistant intervals on a labeled tier.
 # The number of labeled tier and the amount of equidistant intervals can be specified using the form below.
-# The output will be saved to two different log files. 
+# The output will be saved to two different log files.
 # One has the duration information and the other one F0 information.
 # This script does not extract F0 values from labeled tier where the token is shorter than 50ms.
 
-# Copyright@ Miao Zhang, University at Buffalo, 2021. 
+# Copyright@ Miao Zhang, University at Buffalo, 2021.
 # Feel free to use but please cite when you use it.
 
 
@@ -43,9 +43,9 @@ selectObject: "Strings fileList"
 num_file = Get number of strings
 
 # Open the soundfile in Praat
-for ifile from 1 to num_file
+for i_file from 1 to num_file
 	selectObject: "Strings fileList"
-	fileName$ = Get string: ifile
+	fileName$ = Get string: i_file
 	Read from file: directory_name$ + "/" + fileName$
 
 	sound_file = selected("Sound")
@@ -61,10 +61,10 @@ for ifile from 1 to num_file
 
 #######################################################################
 
-	
+
 	for i_label from 1 to num_labels
 		select 'textGridID'
-		
+
 		# Get the name of the label
 		label$ = Get label of interval: labeled_tier_number, i_label
 
@@ -72,7 +72,7 @@ for ifile from 1 to num_file
 			# When the label name is not empty
 			fileappend  'directory_name$''log_file_dyn$'.txt 'sound_name$''tab$'
 
-			# Get the starting and end time point of the label, 
+			# Get the starting and end time point of the label,
 			# and calculate the total duration
 			label_start = Get start time of interval: labeled_tier_number, i_label
 			label_end = Get end time of interval: labeled_tier_number, i_label
@@ -82,13 +82,13 @@ for ifile from 1 to num_file
 			fileappend 'directory_name$''log_file_dyn$'.txt 'label$''tab$''dur:3''tab$'
 
 
-#######################################################################	
-		
+#######################################################################
+
 
 			# Work on individual labeled intervals. Extract pitch and intensity object
 			select 'sound_file'
 
-			# Get the boundaries of the target F0 obtaining interval
+			# Get the boundaries of the target F0-obtaining interval
 			pstart = label_start - pitch_window_threshold
 			pend = label_end + pitch_window_threshold
 
@@ -107,7 +107,7 @@ for ifile from 1 to num_file
 				To Pitch (ac): 0, f0_minimum, 15, "yes", 0.03, voicing_threshold, octave_jump, 0.35, 0.14, f0_maximum
 				pitch_ID = selected("Pitch")
 
-				# Extract the intensity object 
+				# Extract the intensity object
 				select 'intv_ID'
 				Filter (pass Hann band): 40, 4000, 100
 				intv_ID_filt = selected("Sound")
@@ -130,7 +130,7 @@ for ifile from 1 to num_file
 				else
 					fileappend 'directory_name$''log_file_dyn$'.txt 'f0_min:2''tab$''f0_min_loc:2''tab$'
 				endif
-				
+
 				# F0 maximum
 				f0_max = Get maximum: label_start, label_end, "Hertz", "parabolic"
 				f0_max_time = Get time of maximum: label_start, label_end, "Hertz", "parabolic"
@@ -144,7 +144,7 @@ for ifile from 1 to num_file
 
 				# F0 dynamics
 
-				if f0_max <> undefined and f0_min <> undefined 
+				if f0_max <> undefined and f0_min <> undefined
 					if f0_max_time > f0_min_time
 						f0_mgnt = f0_max - f0_min
 						f0_transtime = f0_max_time - f0_min_time
@@ -159,24 +159,25 @@ for ifile from 1 to num_file
 					fileappend 'directory_name$''log_file_dyn$'.txt NA'tab$'NA'newline$'
 				endif
 
-				
-#######################################################################	
+
+#######################################################################
 
 
 				# Pitch and intensity by-time interval analysis
-				
+        
+        size = dur/numintervals
 				for i_intv from 1 to numintervals
-					size = dur/numintervals
+
 
 					# Get the start, end, and middle point of the interval
 					intv_start = label_start + (i_intv-1) * size
 					intv_end = label_start + i_intv * size
 					intv_mid = intv_start + (intv_end - intv_start)/2 - label_start
-					
+
 					# Get the mean F0 of the time interval
 					select 'pitch_ID'
 					f0_intv = Get mean: intv_start, intv_end, "Hertz"
-					
+
 					# Get the mean intensity of the time interval
 					select 'intense_ID'
 					intense_intv = Get mean: intv_start, intv_end, "dB"
@@ -192,19 +193,19 @@ for ifile from 1 to num_file
 							fileappend  'directory_name$''log_file_t$'.txt 'sound_name$''tab$''label$''tab$''i_intv''tab$''intv_mid:3''tab$''f0_intv:2''tab$'NA'newline$'
 						else
 							fileappend  'directory_name$''log_file_t$'.txt 'sound_name$''tab$''label$''tab$''i_intv''tab$''intv_mid:3''tab$''f0_intv:2''tab$''intense_intv:2''newline$'
-						if
+						endif
 					endif
 				endfor
-				
+
 				select 'pitch_ID'
 				plus 'intv_ID'
 				plus 'intense_ID'
 				Remove
-					
+
 			endif
 		endif
 	endfor
-	
+
 	select 'sound_file'
 	Remove
 

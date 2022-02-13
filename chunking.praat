@@ -1,12 +1,14 @@
-# 1. Cuts up large sound files in a directory into smaller chunks using an existing tier on an associated 
-#	TextGrid file.
+# 1. This script cuts up large sound files in a directory into smaller
+# chunks using an existing tier on an associated TextGrid file.
 
-# 2. This script runs through all sound files in a directory and put the chunked files into a new sub-
-#	directoryThe Renamed file prefix is a string that the user can define as they wish.
+# 2. This script runs through all sound files in a directory and put 
+# the chunked files into a new subdirectory. The Renamed file prefix 
+# is a string that you can specify in the form.
 
-# 3. The tier number reflects the tier containing the intervals which will be extracted. 
-# 	The name of the intervals will be used for the main file name when saving the chunked files. The intervals
-#	should only contain ascii characters.
+# 3. The tier number reflects the tier containing the intervals which 
+# will be extracted. The name of the intervals will be used for the 
+# main file name when saving the chunked files. The intervals should 
+# only contain ascii characters.
 
 # 4. If there is already a folder with the same name in the directory, the script won't run.
 
@@ -15,7 +17,7 @@
 ############################################################
 
 form Extract smaller files from large file
-   sentence Directory_name: /Users/zenmule/Research/Vowel_sequence/Recordings/chn/chn_12
+   sentence Directory_name: /Users/zenmule/Programming/rProjects/Time_series_data_tutorial/recordings
    positive Tier_number: 1
 endform
 

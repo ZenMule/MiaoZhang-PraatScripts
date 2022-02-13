@@ -9,7 +9,7 @@
 # Put the directory you want to save files to below
 
 form
-	sentence dir: /Users/zenmule/Research/Vowel_sequence/Recordings/en/en_2
+	sentence dir: /Users/zenmule/Programming/rProjects/Time_series_data_tutorial/recordings/vowels
 endform
 
 ################################################
