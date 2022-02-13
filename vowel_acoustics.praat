@@ -15,8 +15,8 @@
 # the interval. Otherwise the script will only one set of reference
 # formant values.
 
-# The user can specify different reference values for both vowel sequences
-# and monophthongs. # Remeber to change the reference formant values in
+# The user can specify different reference values for vowel sequences
+# monophthongs. # Remeber to change the reference formant values in
 # the form for different vowels to make the formant tracking more accurate.
 
 # Copyright (c) 2021-2022 Miao Zhang
@@ -40,19 +40,19 @@
 form Extract Formant data from labelled intervals on a specific tier
    comment Basic settings:
    sentence Directory_name: /Users/zenmule/Programming/rProjects/Time_series_data_tutorial/recordings/vowels
-   sentence Log_file_t _ai_1t
-   sentence Log_file_d _ai_1d
-   sentence Interval_label ai_t1
-   positive Labeled_tier_number 1
-   integer Syllable_tier_number 0
-   positive Num_chunks 10
+   sentence Log_file_t _ait
+   sentence Log_file_d _aid
+   sentence Interval_label ai
+   positive Labeled_tier_number 2
+   integer Syllable_tier_number 1
+   positive Number_of_chunks 10
    boolean Measure_vowel_sequence 1
 
    comment Formant Settings:
    positive Analysis_points_time_step 0.005
    #positive Record_with_precision 1
-   positive Formant_ceiling 5000
-   positive Number_formants 4
+   positive Formant_ceiling 4000
+   positive Number_of_formants 4
    positive Window_length 0.025
    positive Preemphasis_from 50
    positive Buffer_window_length 0.04
@@ -115,7 +115,7 @@ for i_file from 1 to num_file
 
   # Save the sound file
   sound_file = selected("Sound")
-  printline Start working on sound file 'sound_name$'.wav.
+  printline Start working on sound file < 'sound_name$'.wav >.
 
 	# Open the corresponding TextGrid file in Praat
 	Read from file: directory_name$ + "/" + sound_name$ + ".TextGrid"
@@ -132,7 +132,7 @@ for i_file from 1 to num_file
 
     # If the label is the specified interval label
     if label$ = interval_label$
-      printline Start working on "'label$'".
+      printline Start working on labeled interval 'i_label': < 'label$' >.
 
       # Get the duration of the labeled interval
 		  label_start = Get starting point: labeled_tier_number, i_label
@@ -140,16 +140,16 @@ for i_file from 1 to num_file
       dur = label_end - label_start
 
       # Get the label of the current segment
-      seg$ = do$ ("Get label of interval...", labeled_tier_number, i_label)
+      seg$ = Get label of interval: labeled_tier_number, i_label
 
       # Get the label of the previous segment if it is labeled
-      seg_prev$ = do$ ("Get label of interval...", labeled_tier_number, (i_label-1))
+      seg_prev$ = Get label of interval: labeled_tier_number, (i_label-1)
       if seg_prev$ = ""
         seg_prev$ = "NA"
       endif
 
       # Get the label of the subsequent segment if it is labeled
-			seg_subs$ = do$ ("Get label of interval...", labeled_tier_number, (i_label+1))
+			seg_subs$ = Get label of interval: labeled_tier_number, (i_label+1)
       if seg_subs$ = ""
         seg_subs$ = "NA"
       endif
@@ -157,13 +157,13 @@ for i_file from 1 to num_file
       # Get the lable of the syllable from the syllable tier if there is one
       if syllable_tier_number <> 0
         # Get the index of the current syllable that the labeled segment occurred in
-        syll_num = do ("Get interval at time...", syllable_tier_number, (label_start + (label_end - label_start)/2))
+        syll_num = Get interval at time: syllable_tier_number, (label_start + (label_end - label_start)/2)
 
         # Get the duration of the syllable
         syll_start = Get starting point: syllable_tier_number, syll_num
-        syll_end = Get end piont: syllable_tier_number, syll_num
+        syll_end = Get end point: syllable_tier_number, syll_num
         syll_dur = syll_end - syll_start
-  			syll$ = do$ ("Get label of interval...", syllable_tier_number, syll_num)
+  			syll$ = Get label of interval: syllable_tier_number, syll_num
       else
         # If there is no syllable tier, the label of syllable is NA, and the duration is 0
         syll_dur = 0
@@ -171,7 +171,7 @@ for i_file from 1 to num_file
       endif
 
       # Write the information obtained above to log file d
-      fileappend 'directory_name$''log_file_d$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''dur:0''tab$''seg_prev$''tab$''seg_subs$''tab$''syll$''tab$''syll_dur:0''newline$'
+      fileappend 'directory_name$''log_file_d$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''dur:3''tab$''seg_prev$''tab$''seg_subs$''tab$''syll$''tab$''syll_dur:3''newline$'
 
       #######################################################################
 
@@ -184,10 +184,10 @@ for i_file from 1 to num_file
 			extracted = selected("Sound")
 
       # Get the duration of each equidistant interval of a labeled segment
-			chunk_length  = dur/num_chunks
+			chunk_length  = dur/number_of_chunks
 
       select 'extracted'
-      To Formant (burg): analysis_points_time_step, number_formants, formant_ceiling, window_length, preemphasis_from
+      To Formant (burg): analysis_points_time_step, number_of_formants, formant_ceiling, window_length, preemphasis_from
 			formant_burg = selected("Formant")
 			num_form = Get minimum number of formants
 
@@ -203,8 +203,8 @@ for i_file from 1 to num_file
       # Extract formant values
       if measure_vowel_sequence
         # If the labeled interval is a vowel sequence
-        for i_chunk from 1 to num_chunks
-          if i_chunk <= num_chunks/3
+        for i_chunk from 1 to number_of_chunks
+          if i_chunk <= number_of_chunks/3
             # Track the formants
             select 'formant_burg'
             Track: number_tracks, 'f1_ref_init', 'f2_ref_init', 'f3_ref_init', 'f4_ref', 'f5_ref', 1, 1, 1
@@ -246,7 +246,7 @@ for i_file from 1 to num_file
             # Write the formant values to the log file t
     				fileappend 'directory_name$''log_file_t$'.txt 'f1:0''tab$''f2:0''tab$''f3:0''tab$''f4:0''tab$'
 
-          elif i_chunk <= 2*num_chunks/3
+          elif i_chunk <= 2*number_of_chunks/3
             # Track the formants
             select 'formant_burg'
             Track: number_tracks, 'f1_ref_med', 'f2_ref_med', 'f3_ref_med', 'f4_ref', 'f5_ref', 1, 1, 1
@@ -358,7 +358,7 @@ for i_file from 1 to num_file
 
       else
         # If the lebeled interval is a monophthong
-        for i_chunk from 1 to num_chunks
+        for i_chunk from 1 to number_of_chunks
           # Track the formants
           select 'formant_burg'
           Track: number_tracks, 'f1_ref', 'f2_ref', 'f3_ref', 'f4_ref', 'f5_ref', 1, 1, 1
