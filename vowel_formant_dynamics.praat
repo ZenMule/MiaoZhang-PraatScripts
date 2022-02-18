@@ -45,10 +45,10 @@ form Extract Formant data from labelled intervals on a specific tier
    sentence Interval_label ai
    positive Labeled_tier_number 2
    integer Syllable_tier_number 1
-   positive Number_of_chunks 10
+   positive Number_of_chunks 30
    boolean Measure_vowel_sequence 1
 
-   comment Formant Settings:
+   comment Formant extracting settings:
    positive Analysis_points_time_step 0.005
    #positive Record_with_precision 1
    positive Formant_ceiling 4000
@@ -94,7 +94,7 @@ clearinfo
 #######################################################################
 
 # Create headers for the two output log files
-fileappend 'directory_name$''log_file_t$'.txt File_name'tab$'Seg_num'tab$'Seg'tab$'t'tab$'t_m'tab$'F1'tab$'F2'tab$'F3'tab$'F4'tab$'COG'tab$'sdev'tab$'skew'tab$'kurt'tab$''newline$'
+fileappend 'directory_name$''log_file_t$'.txt File_name'tab$'Seg_num'tab$'Seg'tab$'Syll'tab$'t'tab$'t_m'tab$'F1'tab$'F2'tab$'F3'tab$'F4'tab$'COG'tab$'sdev'tab$'skew'tab$'kurt'tab$''newline$'
 fileappend 'directory_name$''log_file_d$'.txt File_name'tab$'Seg_num'tab$'Seg'tab$'Dur'tab$'Seg_prev'tab$'Seg_subs'tab$'Syll'tab$'Syll_dur'newline$'
 
 #######################################################################
@@ -115,7 +115,7 @@ for i_file from 1 to num_file
 
   # Save the sound file
   sound_file = selected("Sound")
-  printline Start working on sound file < 'sound_name$'.wav >.
+  writeInfoLine: "Sound file < 'i_file' of 'num_file'>: < 'sound_name$'.wav >".
 
 	# Open the corresponding TextGrid file in Praat
 	Read from file: directory_name$ + "/" + sound_name$ + ".TextGrid"
@@ -127,12 +127,12 @@ for i_file from 1 to num_file
 
   # Work on individual labeled segments
   for i_label from 1 to num_labels
-    select 'textGrid_file'
+    selectObject: textGrid_file
 	  label$ = Get label of interval: labeled_tier_number, i_label
 
     # If the label is the specified interval label
     if label$ = interval_label$
-      printline Start working on labeled interval 'i_label': < 'label$' >.
+      appendInfoLine: "Labeled interval 'i_label': < 'label$' >".
 
       # Get the duration of the labeled interval
 		  label_start = Get starting point: labeled_tier_number, i_label
@@ -179,14 +179,14 @@ for i_file from 1 to num_file
       # Extract the formant object first
 			fstart = label_start - buffer_window_length
 			fend = label_end + buffer_window_length
-			select 'sound_file'
+			selectObject: sound_file
 			Extract part: fstart, fend, "rectangular", 1, "no"
 			extracted = selected("Sound")
 
       # Get the duration of each equidistant interval of a labeled segment
 			chunk_length  = dur/number_of_chunks
 
-      select 'extracted'
+      selectObject: extracted
       To Formant (burg): analysis_points_time_step, number_of_formants, formant_ceiling, window_length, preemphasis_from
 			formant_burg = selected("Formant")
 			num_form = Get minimum number of formants
@@ -206,7 +206,7 @@ for i_file from 1 to num_file
         for i_chunk from 1 to number_of_chunks
           if i_chunk <= number_of_chunks/3
             # Track the formants
-            select 'formant_burg'
+            selectObject: formant_burg
             Track: number_tracks, 'f1_ref_init', 'f2_ref_init', 'f3_ref_init', 'f4_ref', 'f5_ref', 1, 1, 1
       			formant_tracked = selected("Formant")
 
@@ -216,9 +216,9 @@ for i_file from 1 to num_file
             chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
             # Write to the log file t
-            fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+            fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
-            select 'formant_tracked'
+            selectObject: formant_tracked
             # F1
             f1 = Get mean: 1, chunk_start, chunk_end, "hertz"
             if f1 = undefined
@@ -248,7 +248,7 @@ for i_file from 1 to num_file
 
           elif i_chunk <= 2*number_of_chunks/3
             # Track the formants
-            select 'formant_burg'
+            selectObject: formant_burg
             Track: number_tracks, 'f1_ref_med', 'f2_ref_med', 'f3_ref_med', 'f4_ref', 'f5_ref', 1, 1, 1
       			formant_tracked = selected("Formant")
 
@@ -258,9 +258,9 @@ for i_file from 1 to num_file
             chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
             # Write to the log file t
-            fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+            fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
-            select 'formant_tracked'
+            selectObject: formant_tracked
             # F1
             f1 = Get mean: 1, chunk_start, chunk_end, "hertz"
             if f1 = undefined
@@ -290,7 +290,7 @@ for i_file from 1 to num_file
 
           else
             # Track the formants
-            select 'formant_burg'
+            selectObject: formant_burg
             Track: number_tracks, 'f1_ref_fin', 'f2_ref_fin', 'f3_ref_fin', 'f4_ref', 'f5_ref', 1, 1, 1
       			formant_tracked = selected("Formant")
 
@@ -300,9 +300,9 @@ for i_file from 1 to num_file
             chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
             # Write to the log file t
-            fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+            fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
-            select 'formant_tracked'
+            selectObject: formant_tracked
             # F1
             f1 = Get mean: 1, chunk_start, chunk_end, "hertz"
             if f1 = undefined
@@ -332,13 +332,13 @@ for i_file from 1 to num_file
           endif
 
           # Remove tracked formant object
-          select 'formant_tracked'
+          selectObject: formant_tracked
           Remove
 
           #######################################################################
 
   			  #Getting spectral moments
-  				select 'sound_file'
+  				selectObject: sound_file
   				Extract part: (i_chunk - 1) * chunk_length, i_chunk * chunk_length, "rectangular", 1, "no"
   				chunk_part = selected("Sound")
   				spect_part = To Spectrum: "yes"
@@ -350,9 +350,8 @@ for i_file from 1 to num_file
           # Write to the log file
   				fileappend 'directory_name$''log_file_t$'.txt 'grav:0''tab$''sdev:0''tab$''skew:0''tab$''kurt:0''newline$'
 
-  				select 'chunk_part'
-  				Remove
-  				select 'spect_part'
+  				selectObject: chunk_part
+  				plusObject: spect_part
   				Remove
   			endfor
 
@@ -360,7 +359,7 @@ for i_file from 1 to num_file
         # If the lebeled interval is a monophthong
         for i_chunk from 1 to number_of_chunks
           # Track the formants
-          select 'formant_burg'
+          selectObject: formant_burg
           Track: number_tracks, 'f1_ref', 'f2_ref', 'f3_ref', 'f4_ref', 'f5_ref', 1, 1, 1
           formant_tracked = selected("Formant")
 
@@ -370,9 +369,9 @@ for i_file from 1 to num_file
           chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
           # Write to the log file t
-          fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+          fileappend 'directory_name$''log_file_t$'.txt 'fileName$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
-          select 'formant_tracked'
+          selectObject: formant_tracked
           # F1
           f1 = Get mean: 1, chunk_start, chunk_end, "hertz"
           if f1 = undefined
@@ -401,13 +400,13 @@ for i_file from 1 to num_file
           fileappend 'directory_name$''log_file_t$'.txt 'f1:0''tab$''f2:0''tab$''f3:0''tab$''f4:0''tab$'
 
         # Remove tracked formant object
-        select 'formant_tracked'
+        selectObject: formant_tracked
         Remove
 
         #######################################################################
 
         #Getting spectral moments
-        select 'sound_file'
+        selectObject: sound_file
         Extract part: (i_chunk - 1) * chunk_length, i_chunk * chunk_length, "rectangular", 1, "no"
         chunk_part = selected("Sound")
         spect_part = To Spectrum: "yes"
@@ -419,16 +418,15 @@ for i_file from 1 to num_file
         # Write to the log file
         fileappend 'directory_name$''log_file_t$'.txt 'grav:0''tab$''sdev:0''tab$''skew:0''tab$''kurt:0''newline$'
 
-        select 'chunk_part'
-        Remove
-        select 'spect_part'
+        selectObject: chunk_part
+        plusObject: spect_part
         Remove
         endfor
 
       endif
 
       # Remove formant objects
-      select 'formant_burg'
+      selectObject: formant_burg
       Remove
 
 		else
@@ -436,11 +434,9 @@ for i_file from 1 to num_file
    	endif
 	endfor
 
-select 'extracted'
-Remove
-select 'textGrid_file'
-Remove
-select 'sound_file'
+selectObject: extracted
+plusObject: textGrid_file
+plusObject: sound_file
 Remove
 
 endfor
@@ -448,4 +444,4 @@ endfor
 select all
 Remove
 
-printline "All done!"
+writeInfoLine: "All done!"
