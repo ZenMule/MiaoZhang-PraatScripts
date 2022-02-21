@@ -6,11 +6,7 @@
 ################################################
 ################################################
 
-# Put the directory you want to save files to below
-
-form
-	sentence dir: /Users/zenmule/Programming/rProjects/Time_series_data_tutorial/recordings/vowels
-endform
+dir$ = chooseDirectory$: "Choose the directory to save files..."
 
 ################################################
 

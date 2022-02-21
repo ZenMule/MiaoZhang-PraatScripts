@@ -1,5 +1,5 @@
-# Extraction of durations from all textgrid files in a directory. 
-# Extracts the duration of every labelled interval on a particular tier. 
+# Extraction of durations from all textgrid files in a directory.
+# Extracts the duration of every labelled interval on a particular tier.
 # Saves the duration data as a text file with the name of both the sound file and the intervals.
 # Copyright Miao Zhang, UB, 6/14/2021.
 
@@ -7,14 +7,16 @@
 
 form Extract durations from labeled tier
    sentence Directory_name: /yourdirectory
-   sentence Log_file: _vot2
-   positive Labeled_tier_number: 1
+   sentence Log_file: _vot
+   positive Vot_tier: 1
+   positive Segment_tier: 2
+   positive Syllable_tier: 3
 endform
 
 ##########################################################
 
 # Create the header row
-fileappend 'directory_name$''log_file$'.txt label'tab$'seg'tab$'dur'newline$'
+fileappend 'directory_name$''log_file$'.txt label'tab$'seg'tab$'dur_cl'newline$'
 
 ##########################################################
 
@@ -63,7 +65,7 @@ for ifile from 1 to num_file
 
 			# put the label and duration of the interval in the output .txt file
 			fileappend 'directory_name$''log_file$'.txt 'seg$''tab$''dur:3''newline$'
-		
+
 		else
 			# do nothing
 		endif

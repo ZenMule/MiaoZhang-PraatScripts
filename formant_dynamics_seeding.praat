@@ -56,14 +56,9 @@ clearinfo
 #######################################################################
 
 form Extract Formant Values
-	comment Basic Settings:
-	sentence Dir_rec /Users/zenmule/Programming/Praat/Praat_Scripting_Tutorial/testing_data/L6
-	sentence Dir_refs /Users/zenmule/Programming/Praat/Praat_Scripting_Tutorial/testing_data/L6
-	sentence Speaker_log sp_log.csv
-	sentence Form_ref_file chn_formant_refs.csv
-	sentence Form_ceiling formant_ceiling_and_num.csv
-	sentence Log_file_t time
-	sentence Log_file_c context
+	comment Basic settings:
+	sentence Log_file_t _time
+	sentence Log_file_c _context
 	integer Syllable_tier_number 0
 	positive Labeled_tier_number 1
 	positive Number_of_chunks 30
@@ -80,19 +75,49 @@ endform
 #######################################################################
 #######################################################################
 
-fileappend 'dir_rec$''log_file_t$'.txt File_name'tab$'Speaker'tab$'Gender'tab$'Seg_num'tab$'Seg'tab$'Syll'tab$'t'tab$'t_m'tab$'F1'tab$'F2'tab$'F3'tab$'F4'tab$'COG'tab$'sdev'tab$'skew'tab$'kurt'tab$''newline$'
-fileappend 'dir_rec$''log_file_c$'.txt File_name'tab$'Speaker'tab$'Gender'tab$'Seg_num'tab$'Seg'tab$'Dur'tab$'Seg_prev'tab$'Seg_subs'tab$'Syll'tab$'Syll_dur'newline$'
+# Read in the speaker log and vowel reference file
+pauseScript: "Choose < SPEAKER LOG > file"
+table_sp_name$ = chooseReadFile$: "Load the SPEAKER LOG file"
+if table_sp_name$ <> ""
+    table_sp = Read Table from comma-separated file: table_sp_name$
+else
+		exitScript: "No < SPEAKER LOG > file was selected."
+endif
+
+# Formant reference
+pauseScript: "Choose <FORMANT REFERENCE> file"
+table_ref_name$ = chooseReadFile$: "Load the FORMANT REFERENCE file"
+if table_ref_name$ <> ""
+    table_ref = Read Table from comma-separated file: table_ref_name$
+else
+		exitScript: "No < FORMANT REFERENCE > file was selected."
+endif
+
+# Formant ceiling and number of formants to track
+pauseScript: "Choose <FORMANT SETTING> file"
+table_ceiling_name$ = chooseReadFile$: "Load the FORMANT CEILING file"
+if table_ceiling_name$ <> ""
+    table_ceiling = Read Table from comma-separated file: table_ceiling_name$
+else
+		exitScript: "No < FORMANT SETTING > file was selected."
+endif
 
 #######################################################################
 
-
-# Read in the speaker log and vowel reference file
-table_sp = Read Table from comma-separated file: dir_refs$ + "/" + speaker_log$
-table_ref = Read Table from comma-separated file: dir_refs$ + "/" + form_ref_file$
-table_form = Read Table from comma-separated file: dir_refs$ + "/" + form_ceiling$
-
 # Get all the folders in the directory
-Create Strings as folder list: "folderList", dir_rec$
+# Choose the root folder of the recordings of all speakers
+pauseScript: "Choose < SOUND FILE > folder"
+dir_rec$ = chooseDirectory$: "Choose <SOUND> folder"
+
+fileappend 'dir_rec$''log_file_t$'.txt File_name'tab$'Speaker'tab$'Gender'tab$'Seg_num'tab$'Seg'tab$'Syll'tab$'t'tab$'t_m'tab$'F1'tab$'F2'tab$'F3'tab$'F4'tab$'COG'tab$'sdev'tab$'skew'tab$'kurt'tab$''newline$'
+fileappend 'dir_rec$''log_file_c$'.txt File_name'tab$'Speaker'tab$'Gender'tab$'Seg_num'tab$'Seg'tab$'Dur'tab$'Seg_prev'tab$'Seg_subs'tab$'Syll'tab$'Syll_dur'newline$'
+
+if dir_rec$ <> ""
+  Create Strings as folder list: "folderList", dir_rec$
+else
+	exitScript: "No folder was selected."
+endif
+
 selectObject: "Strings folderList"
 num_folder = Get number of strings
 
@@ -100,19 +125,20 @@ num_folder = Get number of strings
 for i_folder from 1 to num_folder
   selectObject: "Strings folderList"
 	speaker_id$ = Get string: i_folder
+
 	writeInfoLine: "Current speaker: < 'speaker_id$' >."
 
 	# Get the gender of each speaker from speaker log file
 	selectObject: table_sp
 	sp_col$ = Get column label: 1
-	gender_col$ = Get column label: 2
+	gender_sp_col$ = Get column label: 2
 	gender_row = Search column: sp_col$, speaker_id$
-	gender$ = Get value: gender_row, gender_col$
+	gender$ = Get value: gender_row, gender_sp_col$
 
 	appendInfoLine: "Current gender: < 'gender$' >."
 
 	# Get the formant ceiling and number of formants to track
-	selectObject: table_form
+	selectObject: table_ceiling
 	gender_ceiling_col$ = Get column label: 1
 	ceiling_col$ = Get column label: 2
 	num_form_col$ = Get column label: 3
@@ -134,13 +160,10 @@ for i_folder from 1 to num_folder
 		selectObject: "Strings fileList"
 		file_name$ = Get string: i_file
 		Read from file: dir_rec$ + "/" + speaker_id$ + "/" + file_name$
-
 		sound_file = selected("Sound")
 		sound_name$ = selected$("Sound")
-
 		Read from file: dir_rec$ + "/" + speaker_id$ + "/" + sound_name$ + ".TextGrid"
 		textgrid_file = selected("TextGrid")
-
 		num_label = Get number of intervals: labeled_tier_number
 
     #######################################################################
@@ -154,16 +177,13 @@ for i_folder from 1 to num_folder
 
 			if label$ <> ""
 				appendInfoLine: "Extracting formants from..."
-				appendInfoLine: "  Sound file < 'i_file' of 'num_file'>: < 'sound_name$' > of 'speaker_id$'."
+				appendInfoLine: "  ", fixed$(i_file/num_file, 0), " Sound file < 'i_file' of 'num_file'>: < 'sound_name$' > of 'speaker_id$'."
 				appendInfoLine: "    Interval ['i_label']: <'label$'>."
 
 				# Get the duration of the labeled interval
 				label_start = Get starting point: labeled_tier_number, i_label
 				label_end = Get end point: labeled_tier_number, i_label
 				dur = label_end - label_start
-
-				# Get the label of the current segment
-				seg$ = Get label of interval: labeled_tier_number, i_label
 
 				# Get the label of the previous segment if it is labeled
 				seg_prev$ = Get label of interval: labeled_tier_number, (i_label-1)
@@ -194,7 +214,7 @@ for i_folder from 1 to num_folder
 				endif
 
 				# Write the information obtained above to log file d
-				fileappend 'dir_rec$''log_file_c$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''seg$''tab$''dur:3''tab$''seg_prev$''tab$''seg_subs$''tab$''syll$''tab$''syll_dur:3''newline$'
+				fileappend 'dir_rec$''log_file_c$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''label$''tab$''dur:3''tab$''seg_prev$''tab$''seg_subs$''tab$''syll$''tab$''syll_dur:3''newline$'
 
 				#######################################################################
 
@@ -252,9 +272,9 @@ for i_folder from 1 to num_folder
 					f3_ref_fin = f3_ref_med
 				endif
 
-				appendInfoLine: "      Initial tertile F1: 'f1_ref_init', F2: 'f2_ref_init', and F3: 'f3_ref_init'."
-				appendInfoLine: "      Medial tertile F1: 'f1_ref_med', F2: 'f2_ref_med', and F3: 'f3_ref_med'."
-				appendInfoLine: "      Final tertile F1: 'f1_ref_fin', F2: 'f2_ref_fin', and F3: 'f3_ref_fin'."
+				#appendInfoLine: "      Initial tertile F1: 'f1_ref_init', F2: 'f2_ref_init'."
+				#appendInfoLine: "      Medial tertile F1: 'f1_ref_med', F2: 'f2_ref_med'."
+				#appendInfoLine: "      Final tertile F1: 'f1_ref_fin', F2: 'f2_ref_fin."
 
 				#######################################################################
 
@@ -277,7 +297,7 @@ for i_folder from 1 to num_folder
 	      # Set how many formants the script should track
 	      if num_form = 2
 	        number_tracks = 2
-	      elif num_form = 3
+	      elsif num_form = 3
 	        number_tracks = 3
 	      else
 					number_tracks = 4
@@ -296,7 +316,7 @@ for i_folder from 1 to num_folder
             chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
             # Write to the log file t
-            fileappend 'dir_rec$''log_file_t$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+            fileappend 'dir_rec$''log_file_t$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''label$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
             selectObject: formant_tracked
             # F1
@@ -326,7 +346,7 @@ for i_folder from 1 to num_folder
             # Write the formant values to the log file t
     				fileappend 'dir_rec$''log_file_t$'.txt 'f1:0''tab$''f2:0''tab$''f3:0''tab$''f4:0''tab$'
 
-          elif i_chunk <= 2*number_of_chunks/3
+          elsif i_chunk <= 2*number_of_chunks/3
             # Track the formants
             selectObject: formant_burg
             Track: number_tracks, 'f1_ref_med', 'f2_ref_med', 'f3_ref_med', 'f4_ref', 'f5_ref', 1, 1, 1
@@ -338,7 +358,7 @@ for i_folder from 1 to num_folder
             chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
             # Write to the log file t
-            fileappend 'dir_rec$''log_file_t$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+            fileappend 'dir_rec$''log_file_t$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''label$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
             selectObject: formant_tracked
             # F1
@@ -380,7 +400,7 @@ for i_folder from 1 to num_folder
             chunk_mid = buffer_window_length + chunk_length/2 + (i_chunk - 1) * chunk_length
 
             # Write to the log file t
-            fileappend 'dir_rec$''log_file_t$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''seg$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
+            fileappend 'dir_rec$''log_file_t$'.txt 'file_name$''tab$''speaker_id$''tab$''gender$''tab$''i_label''tab$''label$''tab$''syll$''tab$''i_chunk''tab$''chunk_mid:3''tab$'
 
             selectObject: formant_tracked
             # F1
@@ -411,10 +431,6 @@ for i_folder from 1 to num_folder
     				fileappend 'dir_rec$''log_file_t$'.txt 'f1:0''tab$''f2:0''tab$''f3:0''tab$''f4:0''tab$'
           endif
 
-          # Remove tracked formant object
-          selectObject: formant_tracked
-          Remove
-
           #######################################################################
 
   			  #Getting spectral moments
@@ -430,7 +446,9 @@ for i_folder from 1 to num_folder
           # Write to the log file
   				fileappend 'dir_rec$''log_file_t$'.txt 'grav:0''tab$''sdev:0''tab$''skew:0''tab$''kurt:0''newline$'
 
-  				selectObject: chunk_part
+					# Remove
+					selectObject: formant_tracked
+  				plusObject: chunk_part
   				plusObject: spect_part
   				Remove
   			endfor
