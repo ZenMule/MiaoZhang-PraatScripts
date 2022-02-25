@@ -151,7 +151,7 @@ for i_folder from 1 to num_folder
 	selectObject: "Strings fileList"
 	num_file = Get number of strings
 
-	appendInfoLine: "Number of files: < 'num_file' >."
+	#appendInfoLine: "Number of files: < 'num_file' >."
 
   #######################################################################
 
@@ -176,7 +176,7 @@ for i_folder from 1 to num_folder
       #######################################################################
 
 			if label$ <> ""
-				appendInfoLine: "Extracting formants from..."
+				writeInfoLine: "Extracting formants from..."
 				appendInfoLine: "  ", fixed$(i_file/num_file, 0), " Sound file < 'i_file' of 'num_file'>: < 'sound_name$' > of 'speaker_id$'."
 				appendInfoLine: "    Interval ['i_label']: <'label$'>."
 
@@ -431,6 +431,9 @@ for i_folder from 1 to num_folder
     				fileappend 'dir_rec$''log_file_t$'.txt 'f1:0''tab$''f2:0''tab$''f3:0''tab$''f4:0''tab$'
           endif
 
+					selectObject: formant_tracked
+					Remove
+
           #######################################################################
 
   			  #Getting spectral moments
@@ -447,17 +450,31 @@ for i_folder from 1 to num_folder
   				fileappend 'dir_rec$''log_file_t$'.txt 'grav:0''tab$''sdev:0''tab$''skew:0''tab$''kurt:0''newline$'
 
 					# Remove
-					selectObject: formant_tracked
-  				plusObject: chunk_part
+  				selectObject: chunk_part
   				plusObject: spect_part
   				Remove
   			endfor
+
+				# Remove
+				selectObject: formant_burg
+				plusObject: extracted
+				plusObject: table_vowel
+				Remove
 			endif
 		endfor
+
+		# Remove
+		selectObject: sound_file
+		plusObject: textgrid_file
+		Remove
 	endfor
+
+
 	selectObject: "Strings fileList"
 	Remove
+
 endfor
+
 select all
 Remove
 
