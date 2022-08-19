@@ -148,6 +148,7 @@ for i_folder from 1 to num_folder
 
   # Get all the sound files in the current folder
 	Create Strings as file list: "fileList", dir_rec$ + "/" + speaker_id$ + "/*.wav"
+	Create Strings as file list: "fileList", dir_rec$ + "/" + speaker_id$ + "/*.WAV"
 	selectObject: "Strings fileList"
 	num_file = Get number of strings
 
@@ -456,22 +457,17 @@ for i_folder from 1 to num_folder
   			endfor
 
 				# Remove
-				selectObject: formant_burg
-				plusObject: extracted
-				plusObject: table_vowel
-				Remove
+				removeObject: formant_burg, extracted, table_vowel
+
 			endif
 		endfor
 
 		# Remove
-		selectObject: sound_file
-		plusObject: textgrid_file
-		Remove
+		removeObject: sound_file, textgrid_file
+
 	endfor
 
-
-	selectObject: "Strings fileList"
-	Remove
+	removeObject: "Strings fileList"
 
 endfor
 
@@ -479,5 +475,3 @@ select all
 Remove
 
 writeInfoLine: "All done!"
-
-#################################################################################
