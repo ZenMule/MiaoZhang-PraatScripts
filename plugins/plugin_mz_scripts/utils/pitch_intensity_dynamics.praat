@@ -11,6 +11,8 @@
 #		and the other one with the f0 maxima and minima.
 # 3. Changed to the new Praat syntax to improve code-readability.
 
+# You can set the syllable tier and word tier to 0 if you don't have these two tiers.
+# Change the range of F0 analysis for different speakers. 
 
 #######################################################################
 #######################################################################
