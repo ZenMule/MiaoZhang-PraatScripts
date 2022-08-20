@@ -7,31 +7,30 @@
 
 # Copyright Miao Zhang, UB, 2/24/2022.
 
+# Updated 8/19/2022.
+
 ##########################################################
 
 form Extract durations from labeled tier
-   sentence Directory_name: /Users/zenmule/Programming/Praat/test/annotated
    sentence Log_file: vot
    positive Vot_tier: 1
+   integer Closure_tier: 0 
    positive Segment_tier: 2
    positive Syllable_tier: 3
 endform
 
 ##########################################################
 
+directory_name$ = chooseDirectory$: "Choose <SOUND> folder"
+
 # Create the log file and the header
-output_file$ = directory_name$ + "/" + log_file$ + ".txt"
+output_file$ = directory_name$ + log_file$ + ".tsv"
 sep$ = tab$
 header$ = "file_name" + sep$
-  ...+ "cons" + sep$
-  ...+ "vowel" + sep$
-  ...+ "syllable" + sep$
-  ...+ "syll_intv" + sep$
   ...+ "cl_dur" + sep$
   ...+ "vot" + sep$
   ...+ "cons_dur" + sep$
-  ...+ "vowel_dur" + sep$
-  ...+ "syll_dur" + newline$
+  ...+ "vowel_dur" + newline$
 appendFile: output_file$, header$
 
 ##########################################################
@@ -44,73 +43,70 @@ selectObject: "Strings fileList"
 num_file = Get number of strings
 
 # Loop through the directory
-for ifile from 1 to num_file
+for i_file from 1 to num_file
 	# Read sound file
 	selectObject: "Strings fileList"
-	fileName$ = Get string: ifile
-	sound_file = Read from file: directory_name$ + "/" + fileName$
+	file_name$ = Get string: i_file
+	sound_file = Read from file: directory_name$ + "/" + file_name$
 	sound_name$ = selected$("Sound")
-	textGridID = Read from file: directory_name$ + "/" + sound_name$ + ".TextGrid"
+	textgrid_file = Read from file: directory_name$ + "/" + sound_name$ + ".TextGrid"
 
 	# Get labelled intervals from the specified tier
-	num_syll = Get number of intervals: syllable_tier
+  selectObject: textgrid_file
+	num_vot = Get number of intervals: vot_tier
 
 	# loop through the intervals of the labeled tier
-	for i_syll from 1 to num_syll
-		selectObject: textGridID
-		syll$ = Get label of interval: syllable_tier, i_syll
+	for i_vot from 1 to num_vot
+		selectObject: textgrid_file
+		vot_label$ = Get label of interval: vot_tier, i_vot
 
 		# skip unlabeled intervals
-		if syll$ <> ""
-      # get syllable info
+		if vot_label$ <> ""
+      # get vot
+      vot_start = Get starting point: vot_tier, i_vot
+      vot_end = Get end point: vot_tier, i_vot
+      vot = vot_end - vot_start
+
+      # Get syllable
+      i_syll = Get interval at time: syllable_tier, vot_end
       syll_start = Get starting point: syllable_tier, i_syll
       syll_end = Get end point: syllable_tier, i_syll
       syll_dur = syll_end - syll_start
-      syll_label$ = Get label of interval: syllable_tier, i_syll
 
-      i_vowel = Get interval at time: segment_tier, syll_end
+      # Get consonant
       i_cons = Get interval at time: segment_tier, syll_start
-
-      # Get vowel info
-      v_start = Get starting point: segment_tier, i_vowel-1
-      v_end = Get end point: segment_tier, i_vowel-1
-      v_dur = v_end - v_start
-      v_label$ = Get label of interval: segment_tier, i_vowel-1
-
-      # Get consonant info
       c_start = Get starting point: segment_tier, i_cons
       c_end = Get end point: segment_tier, i_cons
       c_dur = c_end - c_start
-      c_label$ = Get label of interval: segment_tier, i_cons
+      
+      # Get vowel
+      i_vowel = Get interval at time: segment_tier, syll_end 
+      v_start = Get starting point: segment_tier, i_vowel-1
+      v_end = Get end point: segment_tier, i_vowel-1
+      v_dur = v_end - v_start
+      
+      if closure_tier <> 0
+        i_cl = Get interval at time: closure_tier, syll_start
+        cl_start = Get starting point: closure_tier, i_cl
+        cl_end = Get end point: closure_tier, i_cl
+        cl_dur = cl_end - cl_start
+      else
+        cl_dur = 0
+      endif
 
-      i_vot = Get interval at time: vot_tier, c_end
-      i_cl = Get interval at time: vot_tier, c_start
-
-      # Get vot info
-      vot_start = Get starting point: vot_tier, i_vot-1
-      vot_end = Get end point: vot_tier, i_vot-1
-      vot_dur = vot_end - vot_start
-
-      # Get closure info
-      cl_start = Get starting point: vot_tier, i_cl
-      cl_end = Get end point: vot_tier, i_cl
-      cl_dur = cl_end - cl_start
-
-      results$ = fileName$ + sep$
-        ...+ c_label$ + sep$
-        ...+ v_label$ + sep$
-        ...+ syll_label$ + sep$
-        ...+ "'i_syll'" + sep$
+      results$ = file_name$ + sep$
         ...+ "'cl_dur:3'" + sep$
         ...+ "'vot_dur:3'" + sep$
         ...+ "'c_dur:3'" + sep$
-        ...+ "'v_dur:3'" + sep$
-        ...+ "'syll_dur:3'" + newline$
-
+        ...+ "'v_dur:3'" + newline$
       appendFile: output_file$, results$
 		else
 			# do nothing
 		endif
+
+    selectObject: sound_file, textgrid_file
+    Remove
+
 	endfor
 endfor
 
