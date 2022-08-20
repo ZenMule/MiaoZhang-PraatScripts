@@ -1,9 +1,19 @@
+# This is a script to extract vot in lab speech. Each recording should only have one token of trial.
+# Closure, segment, and syllable tier can be set to 0 if you don't have those tiers in your textgrid file.
+# The script will ask you to choose a folder which contains all your recordings and textgrid files.
+
+# The script does not log the labels of each interval, so it will only work well with lab speech of which you should have kept a log that tells you information about each trial.
+
+# Copyright @Miao Zhang, 08/20/2022.
+
+##########################################################
+
 form Extract durations from labeled tier
    sentence Log_file: vot
    positive Vot_tier: 1
    integer Closure_tier: 0 
-   positive Segment_tier: 2
-   positive Syllable_tier: 3
+   integer Segment_tier: 2
+   integer Syllable_tier: 3
 endform
 
 ##########################################################
@@ -61,24 +71,33 @@ for i_file from 1 to num_file
             vot_end = Get end point: vot_tier, i_vot
             vot = vot_end - vot_start
 
-            # Get syllable
-            i_syll = Get interval at time: syllable_tier, vot_end
-            syll_start = Get starting point: syllable_tier, i_syll
-            syll_end = Get end point: syllable_tier, i_syll
-            syll_dur = syll_end - syll_start
+            if syllable_tier <> 0
+              # Get syllable
+              i_syll = Get interval at time: syllable_tier, vot_end
+              syll_start = Get starting point: syllable_tier, i_syll
+              syll_end = Get end point: syllable_tier, i_syll
+              syll_dur = syll_end - syll_start
+            else
+              syll_dur = 0
+            endif
 
-            # Get consonant
-            i_cons = Get interval at time: segment_tier, syll_start
-            c_start = Get starting point: segment_tier, i_cons
-            c_end = Get end point: segment_tier, i_cons
-            c_dur = c_end - c_start
+            if segment_tier <> 0
+              # Get consonant
+              i_cons = Get interval at time: segment_tier, syll_start
+              c_start = Get starting point: segment_tier, i_cons
+              c_end = Get end point: segment_tier, i_cons
+              c_dur = c_end - c_start
       
-            # Get vowel
-            i_vowel = Get interval at time: segment_tier, syll_end 
-            v_start = Get starting point: segment_tier, i_vowel-1
-            v_end = Get end point: segment_tier, i_vowel-1
-            v_dur = v_end - v_start
-      
+              # Get vowel
+              i_vowel = Get interval at time: segment_tier, syll_end 
+              v_start = Get starting point: segment_tier, i_vowel-1
+              v_end = Get end point: segment_tier, i_vowel-1
+              v_dur = v_end - v_start
+            else 
+              c_dur = 0
+              v_dur = 0
+            endif 
+
             if closure_tier <> 0
                 i_cl = Get interval at time: closure_tier, syll_start
                 cl_start = Get starting point: closure_tier, i_cl
