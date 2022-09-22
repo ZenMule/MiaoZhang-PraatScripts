@@ -73,15 +73,15 @@ for i_file from 1 to num_file
 
             if segment_tier <> 0
               # Get consonant
-              i_cons = Get interval at time: segment_tier, syll_start
+              i_cons = Get interval at time: segment_tier, vot_start
               c_start = Get starting point: segment_tier, i_cons
               c_end = Get end point: segment_tier, i_cons
               c_dur = c_end - c_start
       
               # Get vowel
               i_vowel = i_cons + 1 
-              v_start = Get starting point: segment_tier, i_vowel-1
-              v_end = Get end point: segment_tier, i_vowel-1
+              v_start = Get starting point: segment_tier, i_vowel
+              v_end = Get end point: segment_tier, i_vowel
               v_dur = v_end - v_start
             else 
               c_dur = 0
@@ -89,7 +89,7 @@ for i_file from 1 to num_file
             endif 
 
             if closure_tier <> 0
-                i_cl = Get interval at time: closure_tier, syll_start
+                i_cl = Get interval at time: closure_tier, c_start
                 cl_start = Get starting point: closure_tier, i_cl
                 cl_end = Get end point: closure_tier, i_cl
                 cl_dur = cl_end - cl_start
