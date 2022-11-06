@@ -3,117 +3,131 @@
 # Closure and segment tier can be set to 0 if you don't have those tiers in your textgrid file.
 # The script will ask you to choose a folder which contains all your recordings and textgrid files.
 
-# The script does not log the labels of each interval, so it will only work well with lab speech of which you should have kept a log that tells you information about each trial.
-
-# Copyright @Miao Zhang, 08/20/2022.
+# Copyright @Miao Zhang, 10/10/2022.
 
 ##########################################################
 
 form Extract durations from labeled tier
-   sentence Log_file: vot
+   sentence Log_file: _vot
    positive Vot_tier: 1
    integer Closure_tier: 0 
-   integer Segment_tier: 2
+   integer Segment_tier: 0
 endform
 
 ##########################################################
 
+pauseScript: "Please choose the folder that has your recordings and textgrid files."
 directory_name$ = chooseDirectory$: "Choose <SOUND> folder"
 
 # Create the log file and the header
-output_file$ = directory_name$ + log_file$ + ".tsv"
-sep$ = tab$
+output_file$ = directory_name$ + log_file$ + ".csv"
+deleteFile: output_file$
+sep$ = ","
 header$ = "file_name" + sep$
   ...+ "cl_dur" + sep$
   ...+ "vot" + sep$
-  ...+ "cons_dur" + sep$
-  ...+ "vowel_dur" + newline$
-appendFile: output_file$, header$
+  ...+ "label" + sep$
+  ...+ "c_dur" + sep$
+  ...+ "c" + sep$
+  ...+ "v_dur" + sep$
+  ...+ "v"
+writeFileLine: output_file$, header$
 
 ##########################################################
 
 # Create a list of all wav files in the directory
-Create Strings as file list: "fileList", directory_name$ + "/*.wav"
-selectObject: "Strings fileList"
-num_file = Get number of strings
+wavNames$# = fileNames$# (directory_name$ + "/*.wav")
+num_file = size (wavNames$#)
 
 # Open the soundfile in Praat
 for i_file from 1 to num_file
-  prog = i_file/num_file
-  writeInfoLine: "Working progress:"
-  appendInfoLine: " in the directory 'directory_name$':"
-  appendInfoLine: "   Working on file <'i_file'/'num_file'> ('prog:2')." 
-
-	selectObject: "Strings fileList"
-	file_name$ = Get string: i_file
+  	prog = i_file/num_file
+  	writeInfoLine: "Working progress:" + percent$(prog, 1)
+  	appendInfoLine: "	in the directory 'directory_name$':"
+   
+	file_name$ = wavNames$# [i_file]
+  	appendInfoLine: "		Working on file <'file_name$'>."
 
 	# Read sound file
-	Read from file: directory_name$ + "/" + file_name$
-
-	sound_file = selected("Sound")
+	sound_file = Read from file: directory_name$ + "/" + file_name$
 	sound_name$ = selected$("Sound")
+	textgrid_name$ = directory_name$ + "/" + sound_name$ + ".TextGrid"
 
-	# Read the corresponding TextGrid file into Praat
-	Read from file: directory_name$ + "/" + sound_name$ + ".TextGrid"
-	textgrid_file = selected("TextGrid")
+	if fileReadable (textgrid_name$)
+		# Read the corresponding TextGrid file into Praat
+		textgrid_file = Read from file: textgrid_name$
+		num_label = Get number of intervals: vot_tier
 
-    selectObject: textgrid_file
-    num_vot = Get number of intervals: vot_tier
+		for i_vot from 1 to num_label
+			selectObject: textgrid_file
+			vot_label$ = Get label of interval: vot_tier, i_vot
 
-    for i_vot from 1 to num_vot
-        selectObject: textgrid_file
-		vot_label$ = Get label of interval: vot_tier, i_vot
+			# skip unlabeled intervals
+			if vot_label$ <> ""
+				# get vot
+				vot_start = Get starting point: vot_tier, i_vot
+				vot_end = Get end point: vot_tier, i_vot
+				vot = round((vot_end - vot_start)*1000)
 
-        # skip unlabeled intervals
-		if vot_label$ <> ""
-            # get vot
-            vot_start = Get starting point: vot_tier, i_vot
-            vot_end = Get end point: vot_tier, i_vot
-            vot = vot_end - vot_start
+				if closure_tier <> 0
+					i_cl = Get interval at time: closure_tier, vot_start
+					cl_start = Get starting point: closure_tier, i_cl
+					cl_end = Get end point: closure_tier, i_cl
+					cl_dur = round((cl_end - cl_start)*1000)
+				else
+					cl_dur = 0
+				endif
 
-            if segment_tier <> 0
-              # Get consonant
-              i_cons = Get interval at time: segment_tier, vot_start
-              c_start = Get starting point: segment_tier, i_cons
-              c_end = Get end point: segment_tier, i_cons
-              c_dur = c_end - c_start
-      
-              # Get vowel
-              i_vowel = i_cons + 1 
-              v_start = Get starting point: segment_tier, i_vowel
-              v_end = Get end point: segment_tier, i_vowel
-              v_dur = v_end - v_start
-            else 
-              c_dur = 0
-              v_dur = 0
-            endif 
+				if segment_tier <> 0
+					# Get consonant
+					i_cons = Get interval at time: segment_tier, vot_start
+					c_label$ = Get label of interval: segment_tier, i_cons
+					if c_label$ <> ""
+						c_start = Get starting point: segment_tier, i_cons
+						c_end = Get end point: segment_tier, i_cons
+						c_dur = round((c_end - c_start)*1000)
+					else
+						c_label$ = "NA"
+						c_dur = 0
+					endif
+					
+				
+					# Get vowel
+					i_vowel = Get interval at time: segment_tier, vot_end + 0.03
+					v_label$ = Get label of interval: segment_tier, i_vowel
+					if v_label$ <> ""
+						v_start = Get starting point: segment_tier, i_vowel
+						v_end = Get end point: segment_tier, i_vowel
+						v_dur = round((v_end - v_start)*1000)	
+					else
+						v_label$ = "NA"
+						v_dur = 0
+					endif
 
-            if closure_tier <> 0
-                i_cl = Get interval at time: closure_tier, c_start
-                cl_start = Get starting point: closure_tier, i_cl
-                cl_end = Get end point: closure_tier, i_cl
-                cl_dur = cl_end - cl_start
-            else
-                cl_dur = 0
-            endif
+				else 
+					c_label$ = "NA"
+					v_label$ = "NA"
+					c_dur = 0
+					v_dur = 0
+				endif 
 
-            results$ = sound_name$ + sep$
-                ...+ "'cl_dur:3'" + sep$
-                ...+ "'vot:3'" + sep$
-                ...+ "'c_dur:3'" + sep$
-                ...+ "'v_dur:3'" + newline$
-            appendFile: output_file$, results$
-	    else
-			# do nothing
-		endif
-    endfor   
-    
-    selectObject: sound_file, textgrid_file
-    Remove
+				results$ = sound_name$ + sep$
+					...+ "'cl_dur'" + sep$
+					...+ "'vot'" + sep$
+					...+ vot_label$ + sep$
+					...+ "'c_dur'" + sep$
+					...+ c_label$ + sep$
+					...+ "'v_dur'" + sep$
+					...+ v_label$
+				appendFileLine: output_file$, results$
+			endif
+		endfor
+		removeObject: textgrid_file
+	endif
+	
+	removeObject: sound_file
 
 endfor
 
-appendInfoLine: ""
-appendInfoLine: "Congrats! All files processed."
-select all
-Remove
+
+writeInfoLine: "Congrats!"

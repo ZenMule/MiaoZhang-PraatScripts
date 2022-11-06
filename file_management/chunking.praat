@@ -16,9 +16,11 @@
 
 ############################################################
 
-form Extract smaller files from large file
+form Extract sound
    sentence Directory_name: /Users/zenmule/Research/Vowel_sequence/Recordings/jpn/jpn_12
    positive Tier_number: 1
+   comment Save the textgrid file as well?
+   boolean Save_textgrid 1
 endform
 
 ############################################################
@@ -33,8 +35,11 @@ Create Strings as file list: "fileList", directory_name$ + "/*.wav"
 selectObject: "Strings fileList"
 num_file = Get number of strings
 
-for i_file from 1 to num_file
+# Create a subdirectory to save the chunked recordings later
+new_dir$ = directory_name$ + "/" + "originals"
+createFolder: new_dir$
 
+for i_file from 1 to num_file
 	# Make sure the file list is selected before reading in sound files
 	selectObject: "Strings fileList"
 	current_file$ = Get string: i_file
@@ -46,10 +51,6 @@ for i_file from 1 to num_file
 	# Get the name of the sound file
 	sound_name$ = selected$ ("Sound")
 
-	# Create a subdirectory to save the chunked recordings later
-	new_dir$ = directory_name$ + "/" + sound_name$
-	runSystem: "mkdir ", new_dir$
-
 	# Read the textgrid file
 	Read from file: directory_name$ + "/" + sound_name$ + ".TextGrid"
 	textgrid_file = selected("TextGrid")
@@ -57,7 +58,7 @@ for i_file from 1 to num_file
 	# Get the total number of intervals from the target tier
 	selectObject: textgrid_file
 	num_intvl = Get number of intervals: tier_number
-  perc = i_file/num_file
+  	perc$ = percent$(i_file/num_file, 1)
 
 	for i from 1 to num_intvl
 		# Make sure the textgrid file is selected before running the codes below
@@ -69,8 +70,8 @@ for i_file from 1 to num_file
 		# If the label is not empty, then
 		if lab$ <> ""
 			# Report the current progress
-      writeInfoLine: "'perc:2'", tab$, "Chunking file < ", sound_name$, " >."
-			appendInfoLine: tab$, "Chunking interval < ", lab$, " >."
+     		writeInfoLine: perc$, tab$, "Chunking file < ", sound_name$, " >."
+			appendInfoLine: tab$, "    Clipping interval < ", lab$, " >."
 
 			# Get the start and end time of the current labeled interval
 			start = Get start time of interval: tier_number, i
@@ -85,14 +86,16 @@ for i_file from 1 to num_file
 			sound_chunk = Extract part: start, end, "rectangular", 1, "no"
 
 			# Save the sound file with the prefix specified in the form and the current name of the label
-      selectObject: sound_chunk
-			Write to WAV file: new_dir$ + "/" + sound_name$ + "_" + lab$ + ".wav"
+      		selectObject: sound_chunk
+			Write to WAV file: directory_name$ + "/" + sound_name$ + "_" + "'i'" + "_" + lab$ + ".wav"
 
-			# Save the textgrid file in the same way
-			selectObject: textgrid_chunk
-			Save as text file: new_dir$ + "/" + sound_name$ + "_" + lab$ + ".TextGrid"
+			if save_textgrid = 1
+				# Save the textgrid file in the same way
+				selectObject: textgrid_chunk
+				Save as text file: directory_name$ + "/" + sound_name$ + "_" + "'i'" + "_" + lab$ + ".TextGrid"
+			endif
 
-      removeObject: sound_chunk, textgrid_chunk
+      		removeObject: sound_chunk, textgrid_chunk
 
 		# If the label is empty, then do nothing
 		else
@@ -100,11 +103,17 @@ for i_file from 1 to num_file
 		endif
 	endfor
 
-  removeObject: sound_file, textgrid_file
+	# Save the original files in a new folder
+	selectObject: sound_file
+	Write to WAV file: new_dir$ + "/" + current_file$
+	selectObject: textgrid_file
+	Save as text file: new_dir$ + "/" + sound_name$ + ".TextGrid"
+
+  	removeObject: sound_file, textgrid_file
+
+	# Delete the original files in the original directory
+	deleteFile: directory_name$ + "/" + current_file$, directory_name$ + "/" + sound_name$ + ".TextGrid"
 
 endfor
 
-select all
-Remove
-
-writeInfoLine: "All done!"
+writeInfoLine: "Finished!"
