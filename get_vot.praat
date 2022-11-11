@@ -3,15 +3,16 @@
 # Closure and segment tier can be set to 0 if you don't have those tiers in your textgrid file.
 # The script will ask you to choose a folder which contains all your recordings and textgrid files.
 
-# Copyright @Miao Zhang, 10/10/2022.
+# Copyright @Miao Zhang, 11/6/2022.
 
 ##########################################################
 
 form Extract durations from labeled tier
    sentence Log_file: _vot
    positive Vot_tier: 1
-   integer Closure_tier: 0 
-   integer Segment_tier: 0
+   comment If you don't have a closure or segment tier, set them to 0
+   integer Closure_tier: 2
+   integer Segment_tier: 3
 endform
 
 ##########################################################
@@ -71,9 +72,14 @@ for i_file from 1 to num_file
 
 				if closure_tier <> 0
 					i_cl = Get interval at time: closure_tier, vot_start
-					cl_start = Get starting point: closure_tier, i_cl
-					cl_end = Get end point: closure_tier, i_cl
-					cl_dur = round((cl_end - cl_start)*1000)
+					cl_label$ = Get label of interval: closure_tier, i_cl
+					if cl_label$ <> ""
+						cl_start = Get starting point: closure_tier, i_cl
+						cl_end = Get end point: closure_tier, i_cl
+						cl_dur = round((cl_end - cl_start)*1000)
+					else
+						cl_dur = 0
+					endif
 				else
 					cl_dur = 0
 				endif
