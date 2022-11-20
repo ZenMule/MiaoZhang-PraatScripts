@@ -1,4 +1,5 @@
 # This is a script to change label names in textgrid files in a folder.
+# The new textgrid files will overwrite the old ones. Make sure you have made backups before running this script.
 # Copyright @ Miao Zhang, 2022/11/19.
 
 form 
