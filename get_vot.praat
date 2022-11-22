@@ -20,6 +20,8 @@ endform
 pauseScript: "Please choose the folder that has your recordings and textgrid files."
 directory_name$ = chooseDirectory$: "Choose <SOUND> folder"
 
+stopwatch
+
 # Create the log file and the header
 output_file$ = directory_name$ + log_file$ + ".csv"
 deleteFile: output_file$
@@ -62,6 +64,7 @@ for i_file from 1 to num_file
 		for i_vot from 1 to num_label
 			selectObject: textgrid_file
 			vot_label$ = Get label of interval: vot_tier, i_vot
+			vot_label$ = replace_regex$ (vot_label$, "[^-vot]+", "", 0)
 
 			# skip unlabeled intervals
 			if vot_label$ <> ""
@@ -88,6 +91,8 @@ for i_file from 1 to num_file
 					# Get consonant
 					i_cons = Get interval at time: segment_tier, vot_start
 					c_label$ = Get label of interval: segment_tier, i_cons
+					c_label$ = replace_regex$ (c_label$, "[^[:alnum:]]+", "", 0)
+
 					if c_label$ <> ""
 						c_start = Get starting point: segment_tier, i_cons
 						c_end = Get end point: segment_tier, i_cons
@@ -99,8 +104,11 @@ for i_file from 1 to num_file
 					
 				
 					# Get vowel
-					i_vowel = Get interval at time: segment_tier, vot_end + 0.03
+					#i_vowel = Get interval at time: segment_tier, vot_end + 0.03
+					i_vowel = Get interval at time: segment_tier, vot_end+0.03
 					v_label$ = Get label of interval: segment_tier, i_vowel
+					v_label$ = replace_regex$ (v_label$, "[^[:alnum:]]+", "", 0)
+
 					if v_label$ <> ""
 						v_start = Get starting point: segment_tier, i_vowel
 						v_end = Get end point: segment_tier, i_vowel
@@ -135,5 +143,7 @@ for i_file from 1 to num_file
 
 endfor
 
+runtime = stopwatch
+runtime = round(runtime)
 
-writeInfoLine: "Congrats!"
+writeInfoLine: "Done. It took 'runtime's."
