@@ -28,8 +28,8 @@ deleteFile: output_file$
 sep$ = ","
 header$ = "file_name" + sep$
   ...+ "cl_dur" + sep$
+  ...+ "vot" + sep$
   ...+ "vot_type" + sep$
-  ...+ "label" + sep$
   ...+ "c_dur" + sep$
   ...+ "c_label" + sep$
   ...+ "v_dur" + sep$
