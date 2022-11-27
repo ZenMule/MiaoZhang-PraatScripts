@@ -1,5 +1,5 @@
 # This is a script to extract vot in lab speech. Each recording should only have one token of trial.
-# It also logs the closure duration, the consonant and vowel duration as well
+# It also logs the closure duration, the consonant and vowel duration as well.
 # Closure and segment tier can be set to 0 if you don't have those tiers in your textgrid file.
 # The script will ask you to choose a folder which contains all your recordings and textgrid files.
 
@@ -8,11 +8,13 @@
 ##########################################################
 
 form Extract durations from labeled tier
-   sentence Log_file: _vot
-   positive Vot_tier: 1
-   comment If you don't have a closure or segment tier, set them to 0
-   integer Closure_tier: 2
-   integer Segment_tier: 3
+	comment The suffix of your output file:
+  	sentence Log_file: _vot
+   	comment On which tier vot is labeled?
+   	positive Vot_tier: 1
+   	comment If you don't have a closure or segment tier, set them to 0
+   	integer Closure_tier: 2
+   	integer Segment_tier: 3
 endform
 
 ##########################################################
@@ -64,7 +66,7 @@ for i_file from 1 to num_file
 		for i_vot from 1 to num_label
 			selectObject: textgrid_file
 			vot_label$ = Get label of interval: vot_tier, i_vot
-			vot_label$ = replace_regex$ (vot_label$, "[^-vot]+", "", 0)
+			vot_label$ = replace_regex$ (vot_label$, "[\s|\t|,|.]+", "", 0)
 
 			# skip unlabeled intervals
 			if vot_label$ <> ""
@@ -74,7 +76,11 @@ for i_file from 1 to num_file
 				vot = round((vot_end - vot_start)*1000)
 
 				if closure_tier <> 0
-					i_cl = Get interval at time: closure_tier, vot_start
+					if index (vot_label$, "-") <> 0
+						i_cl = Get interval at time: closure_tier, vot_start
+					else
+						i_cl = Get interval at time: closure_tier, vot_start-0.03
+					endif
 					cl_label$ = Get label of interval: closure_tier, i_cl
 					if cl_label$ <> ""
 						cl_start = Get starting point: closure_tier, i_cl
@@ -91,7 +97,7 @@ for i_file from 1 to num_file
 					# Get consonant
 					i_cons = Get interval at time: segment_tier, vot_start
 					c_label$ = Get label of interval: segment_tier, i_cons
-					c_label$ = replace_regex$ (c_label$, "[^[:alnum:]]+", "", 0)
+					c_label$ = replace_regex$ (c_label$, "[\s|\t|,|.]+", "", 0)
 
 					if c_label$ <> ""
 						c_start = Get starting point: segment_tier, i_cons
@@ -101,18 +107,20 @@ for i_file from 1 to num_file
 						c_label$ = "NA"
 						c_dur = 0
 					endif
-					
-				
+									
 					# Get vowel
-					#i_vowel = Get interval at time: segment_tier, vot_end + 0.03
-					i_vowel = Get interval at time: segment_tier, vot_end+0.03
+					if vot_end < cl_end
+						i_vowel = Get interval at time: segment_tier, cl_end+0.015
+					else
+						i_vowel = Get interval at time: segment_tier, vot_end+0.015
+					endif
 					v_label$ = Get label of interval: segment_tier, i_vowel
-					v_label$ = replace_regex$ (v_label$, "[^[:alnum:]]+", "", 0)
+					v_label$ = replace_regex$ (v_label$, "[\s|\t|,|.]+", "", 0)
 
 					if v_label$ <> ""
 						v_start = Get starting point: segment_tier, i_vowel
 						v_end = Get end point: segment_tier, i_vowel
-						v_dur = round((v_end - v_start)*1000)	
+						v_dur = round((v_end - v_start)*1000)
 					else
 						v_label$ = "NA"
 						v_dur = 0
