@@ -31,7 +31,6 @@ sep$ = ","
 header$ = "file_name" + sep$
   ...+ "cl_dur" + sep$
   ...+ "vot" + sep$
-  ...+ "vot_type" + sep$
   ...+ "c_dur" + sep$
   ...+ "c_label" + sep$
   ...+ "v_dur" + sep$
@@ -48,10 +47,8 @@ num_file = size (wavNames$#)
 for i_file from 1 to num_file
   	prog = i_file/num_file
   	writeInfoLine: "Working progress:" + percent$(prog, 1)
-  	appendInfoLine: "	in the directory 'directory_name$':"
    
 	file_name$ = wavNames$# [i_file]
-  	appendInfoLine: "		Working on file <'file_name$'>."
 
 	# Read sound file
 	sound_file = Read from file: directory_name$ + "/" + file_name$
@@ -74,6 +71,9 @@ for i_file from 1 to num_file
 				vot_start = Get starting point: vot_tier, i_vot
 				vot_end = Get end point: vot_tier, i_vot
 				vot = round((vot_end - vot_start)*1000)
+				if index (vot_label$, "-") <> 0
+					vot = vot*(-1)
+				endif
 
 				if closure_tier <> 0
 					if index (vot_label$, "-") <> 0
@@ -136,7 +136,6 @@ for i_file from 1 to num_file
 				results$ = sound_name$ + sep$
 					...+ "'cl_dur'" + sep$
 					...+ "'vot'" + sep$
-					...+ vot_label$ + sep$
 					...+ "'c_dur'" + sep$
 					...+ c_label$ + sep$
 					...+ "'v_dur'" + sep$
