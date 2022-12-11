@@ -9,17 +9,17 @@
 
 form Extract durations from labeled tier
 	comment The suffix of your output file:
-  	sentence Log_file: _vot
+  	sentence Log_file _vot
    	comment On which tier vot is labeled?
-   	positive Vot_tier: 1
+   	positive Vot_tier 1
    	comment If you don't have a closure or segment tier, set them to 0
-   	integer Closure_tier: 2
-   	integer Segment_tier: 3
+   	integer Closure_tier 2
+   	integer Segment_tier 3
 endform
 
 ##########################################################
 
-pauseScript: "Please choose the folder that has your recordings and textgrid files."
+pauseScript: "Please choose the folder that contains your recordings and textgrid files."
 directory_name$ = chooseDirectory$: "Choose <SOUND> folder"
 
 stopwatch
@@ -81,7 +81,14 @@ for i_file from 1 to num_file
 					else
 						i_cl = Get interval at time: closure_tier, vot_start-0.03
 					endif
-					cl_label$ = Get label of interval: closure_tier, i_cl
+
+					if i_cl <> 0
+						cl_label$ = Get label of interval: closure_tier, i_cl
+					else
+						cl_label$ = ""
+						cl_dur = 0
+					endif
+
 					if cl_label$ <> ""
 						cl_start = Get starting point: closure_tier, i_cl
 						cl_end = Get end point: closure_tier, i_cl
@@ -114,8 +121,15 @@ for i_file from 1 to num_file
 					else
 						i_vowel = Get interval at time: segment_tier, vot_end+0.015
 					endif
-					v_label$ = Get label of interval: segment_tier, i_vowel
-					v_label$ = replace_regex$ (v_label$, "[\s|\t|,|.]+", "", 0)
+
+					if i_vowel <> 0
+						v_label$ = Get label of interval: segment_tier, i_vowel
+						v_label$ = replace_regex$ (v_label$, "[\s|\t|,|.]+", "", 0)
+					else
+						v_label$ = ""
+						v_dur = 0
+					endif
+
 
 					if v_label$ <> ""
 						v_start = Get starting point: segment_tier, i_vowel
