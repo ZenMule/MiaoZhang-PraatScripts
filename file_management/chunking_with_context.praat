@@ -7,6 +7,7 @@ form Chunking sound and preserve the context
        option .wav
 	   option .WAV
     positive Labeled_tier_number 2
+    positive Word_tier_number 1
     sentence Target_labels i e a o u
     positive Buffer_window 0.1
 endform
@@ -62,11 +63,17 @@ for i_file from 1 to size (fileNames$#)
             fllw$ = Get label of interval: labeled_tier_number, i_label+1
             if fllw$ = ""
                 fllw$ = "NA"
-            endif
+            endif 
 
             label_start = Get starting point: labeled_tier_number, i_label
             label_end = Get end point: labeled_tier_number, i_label
             label_med = label_start + (label_end - label_start)/2
+
+            word_intv = Get interval at time: word_tier_number, label_med
+            word$ = Get label of interval: word_tier_number, word_intv
+            if word$ = ""
+                word$ = "NA"
+            endif
 
             chunk_start = label_start - buffer_window
             chunk_end = label_end + buffer_window
@@ -93,11 +100,11 @@ for i_file from 1 to size (fileNames$#)
 			sound_chunk = Extract part: chunk_start, chunk_end, "rectangular", 1, "no"
 
             selectObject: sound_chunk
-			Write to WAV file: new_dir$ + "/" + textgrid_name$ + "_" + "'i_label'" + "_" + prev$ + "_" + label$ + "_" + fllw$ + ".wav"
+			Write to WAV file: new_dir$ + "/" + textgrid_name$ + "_" + "'i_label'" + "_" + word$ + "_" + prev$ + "_" + label$ + "_" + fllw$ + ".wav"
 
             # Save the textgrid file in the same way
             selectObject: textgrid_chunk
-            Save as text file: new_dir$ + "/" + textgrid_name$ + "_" + "'i_label'" + "_" + prev$ + "_" + label$ + "_" + fllw$ + ".TextGrid"
+            Save as text file: new_dir$ + "/" + textgrid_name$ + "_" + "'i_label'" + "_" + word$ + "_" + prev$ + "_" + label$ + "_" + fllw$ + ".TextGrid"
 
             removeObject: textgrid_chunk, sound_chunk
         endif

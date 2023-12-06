@@ -63,7 +63,7 @@ for i_file from 1 to num_file
 		for i_vot from 1 to num_label
 			selectObject: textgrid_file
 			vot_label$ = Get label of interval: vot_tier, i_vot
-			vot_label$ = replace_regex$ (vot_label$, "[\s|\t|,|.]+", "", 0)
+			vot_label$ = replace_regex$ (vot_label$, "\s+", "", 0)
 
 			# skip unlabeled intervals
 			if vot_label$ <> ""

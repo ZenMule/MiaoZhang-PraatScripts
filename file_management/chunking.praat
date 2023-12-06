@@ -2,7 +2,7 @@
 # chunks using an existing tier on an associated TextGrid file.
 
 # 2. This script runs through all sound files in a directory and put
-# the chunked files into a new subdirectory. The Renamed file prefix
+# the chunked files into a new subdirectory. The renamed file prefix
 # is a string that you can specify in the form.
 
 # 3. The tier number reflects the tier containing the intervals which
@@ -13,20 +13,26 @@
 # 4. If there is already a folder with the same name in the directory, the script won't run.
 
 # 5. Copyright Miao Zhang, SUNY Buffalo, 7/8/2021.
+#    Modified by Miao Zhang, 6/2/2023.
 
 ############################################################
 
 form Extract sound
-   sentence Directory_name: /Users/zenmule/Research/Vowel_sequence/Recordings/jpn/jpn_12
-   positive Tier_number: 1
-   comment Save the textgrid file as well?
-   boolean Save_textgrid 1
+	comment Which tier is the chunking tier?
+   	positive Tier_number: 1
+   	comment Do you want to chunk and save the textgrid files too?
+   	boolean Save_textgrid 0
+   	comment Do you want to keep the interval ids in the final file name?
+   	boolean Save_intid 0
 endform
 
 ############################################################
 
 # Clear the info window
 clearinfo
+
+pauseScript: "Please choose the folder where you saved your sound and textgrid files."
+directory_name$ = chooseDirectory$: "Choose <SOUND> folder"
 
 # Create a file list for all the recordings in the directory
 Create Strings as file list: "fileList", directory_name$ + "/*.wav"
@@ -70,7 +76,7 @@ for i_file from 1 to num_file
 		# If the label is not empty, then
 		if lab$ <> ""
 			# Report the current progress
-     		writeInfoLine: perc$, tab$, "Chunking file < ", sound_name$, " >."
+     		writeInfoLine: "Chunking file < ", sound_name$, " >."
 			appendInfoLine: tab$, "    Clipping interval < ", lab$, " >."
 
 			# Get the start and end time of the current labeled interval
@@ -87,12 +93,20 @@ for i_file from 1 to num_file
 
 			# Save the sound file with the prefix specified in the form and the current name of the label
       		selectObject: sound_chunk
-			Write to WAV file: directory_name$ + "/" + sound_name$ + "_" + "'i'" + "_" + lab$ + ".wav"
+			if save_intid = 1
+				Write to WAV file: directory_name$ + "/" + sound_name$ + "_" + "'i'" + "_" + lab$ + ".wav"
+			else
+				Write to WAV file: directory_name$ + "/" + sound_name$ + "_" + lab$ + ".wav"
+			endif
 
 			if save_textgrid = 1
 				# Save the textgrid file in the same way
 				selectObject: textgrid_chunk
-				Save as text file: directory_name$ + "/" + sound_name$ + "_" + "'i'" + "_" + lab$ + ".TextGrid"
+				if save_intid = 1
+					Save as text file: directory_name$ + "/" + sound_name$ + "_" + "'i'" + "_" + lab$ + ".TextGrid"
+				else
+					Save as text file: directory_name$ + "/" + sound_name$ + "_" + lab$ + ".TextGrid"
+				endif
 			endif
 
       		removeObject: sound_chunk, textgrid_chunk
@@ -112,7 +126,8 @@ for i_file from 1 to num_file
   	removeObject: sound_file, textgrid_file
 
 	# Delete the original files in the original directory
-	deleteFile: directory_name$ + "/" + current_file$, directory_name$ + "/" + sound_name$ + ".TextGrid"
+	deleteFile: directory_name$ + "/" + current_file$
+	deleteFile: directory_name$ + "/" + sound_name$ + ".TextGrid"
 
 endfor
 
