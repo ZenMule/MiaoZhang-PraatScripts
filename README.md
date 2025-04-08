@@ -1,2 +1,4 @@
-# myPraatScripts
-This is some simple Praat scripts I created. I'm a beginner on Praat scripting. Any comments are welcome.
+# My Praat Scripts
+These are some simple Praat scripts I created. 
+
+Please feel free to use them for your own needs. 
