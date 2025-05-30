@@ -1,13 +1,12 @@
 # Extraction of durations from all labeled intervals on a tier in a textgrid file.
+# The script will loop through all the subfolders.
 # Copyright Miao Zhang, UB, 6/14/2021.
 # Modified at 6/13/2023.
 
 ##########################################################
 
 form Extract durations from labeled tier
-	optionmenu Format: 1
-       option .wav
-	   option .WAV
+	sentence Format: .wav
    	sentence Log_file: _vot
    	positive Labeled_tier: 1
 endform
