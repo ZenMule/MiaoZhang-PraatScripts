@@ -7,7 +7,7 @@
 
 form Extract durations from labeled tier
 	sentence Format: .wav
-   	sentence Log_file: _vot
+   	sentence Log_file: _dur
    	positive Labeled_tier: 1
 endform
 
