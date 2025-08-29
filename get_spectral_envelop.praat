@@ -19,7 +19,7 @@ form data from labelled points
    positive Labeled_tier_number 1
    positive Analysis_points_time_step 0.005
    positive Record_with_precision 1
-   positive Bin_size 100
+   positive Bin_size 50
    positive Resampling_value 32000
    positive Low_cutoff 300
    positive High_cutoff 16000
@@ -37,7 +37,7 @@ n_folder = size (subfolders$#)
 # Create a log file to write results to.
 log_file$ = directory_name$ + "/" + log_file$ + ".csv"
 deleteFile: log_file$
-writeFileLine: log_file$, "FolderName,FileName,Seg,Seg_num,Duration,Interval,Bin,Amplitude"
+writeFileLine: log_file$, "FolderName,FileName,Seg_prev,Seg,Seg_num,Seg_next,Duration,Interval,Bin,Amplitude"
 
 for i_folder from 1 to n_folder
 	subfolder$ = subfolders$# [i_folder]
@@ -54,7 +54,7 @@ for i_folder from 1 to n_folder
 		soundID1$ = selected$("Sound")
 		
 		selectObject: soundID2
-		Resample: resampling_value, 50
+		soundID3 = Resample: resampling_value, 50
 		soundID3 = Filter (pass Hann band): low_cutoff, high_cutoff, filter_smoothing
 		
 		Read from file: subfolder_path$ + "/" + soundID1$ + ".TextGrid"
@@ -68,6 +68,9 @@ for i_folder from 1 to n_folder
 			label$ = Get label of interval: labeled_tier_number, i
 			idx = index(interval_label$#, label$)
 			if label$ <> "" and idx > 0
+				label_before$ = Get label of interval: labeled_tier_number, i - 1
+				label_after$ = Get label of interval: labeled_tier_number, i + 1
+
 				writeInfoLine: "Processing folder: " + subfolder$ + "(" + "'i_folder'" + "/" + "'n_folder'" + ")"
 				appendInfoLine: "Processing file: " + fileName$ + "(" + "'ifile'" + "/" + "'n_file'" + ")"
 
@@ -95,8 +98,7 @@ for i_folder from 1 to n_folder
 					for k to colnum
 						val = Get value in cell: 1, k
 						val$ = fixed$(val, 2)
-						appendFileLine: log_file$, subfolder$ + "," + fileName$ + "," + label$ + "," + "'i'" + "," + dur$ + "," + "'j'" + "," + "'k'" + "," + 
-							... val$
+						appendFileLine: log_file$, subfolder$ + "," + fileName$ + "," label_before$ + "," + label$ + "," + "'i'" + "," + label_after$ + "," + dur$ + "," + "'j'" + "," + "'k'" + "," + val$
 					endfor
 
 					removeObject: chunk_part, spect, ltas, mat
